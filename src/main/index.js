@@ -2,6 +2,8 @@
 
 import { app, BrowserWindow, ipcMain } from 'electron'
 import DiscordRPC from 'discord-rpc'
+import electrondebug from 'electron-debug'
+electrondebug({ showDevTools: true })
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -42,6 +44,8 @@ function updateConfig (cfg) {
   }
 }
 
+let ClientID = null
+
 function createWindow () {
   /**
    * Initial window options
@@ -49,25 +53,26 @@ function createWindow () {
   let mainWindow = new BrowserWindow({
     height: 450,
     useContentSize: false,
-    width: 270,
-    resizable: true
+    width: 229,
+    resizable: false
   })
+
+  mainWindow.loadURL(winURL)
+  // mainWindow.webContents.openDevTools()
 
   ipcMain.on('asynchronous-message', (event, args) => {
     config.rpc = updateConfig(args.rpc)
-    try {
-      rpc.destroy()
-    } catch (e) {
-      console.log(e)
+    if ((args.client_id.match(/^\d+$/)) && (ClientID !== args.client_ID) && (args.client_id.length >= 16)) {
+      ClientID = args.client_id
+      setTimeout(() => {
+        rpc.login(args.client_id).then(data => {
+          event.sender.send('asynchronous-reply', data)
+        }).catch(err => {
+          event.sender.send('asynchronous-reply', err)
+        })
+      }, 15)
     }
-    rpc.login(args.client_id).then(data => {
-      event.sender.send('asynchronous-reply', data)
-    }).catch(err => {
-      event.sender.send('asynchronous-reply', err)
-    })
   })
-  mainWindow.loadURL(winURL)
-  mainWindow.webContents.openDevTools()
 
   mainWindow.on('closed', () => {
     mainWindow = null

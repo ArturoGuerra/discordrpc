@@ -101,7 +101,12 @@ export default {
   },
   watch: {
     'client_id': function () {
-      this.save()
+      if ((this.client_id.match(/^\d+$/)) && (this.client_id.length >= 16)) {
+        this.save()
+        console.log('Valid ID: ' + this.client_id)
+      } else {
+        console.log('Invalid ID: ' + this.client_id)
+      }
     },
     'details': function () {
       this.save()
@@ -132,9 +137,12 @@ export default {
 
   .container {
     display: grid;
-    max-width: 250px;
-    width: 250px;
-    padding: 4px 4px 4px 4px;
+    min-width: 100vh;
+    max-width: 228px;
+    padding-left: auto;
+    padding-right: auto;
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
 
   input {
@@ -157,23 +165,4 @@ export default {
     margin-bottom: 6px;
     width: 200px;
   }
-
-  .container-1 {
-    display: flex;
-    padding: 0px 5px 1px 5px;
-    width: 200px;
-  }
-
-  .container-1.start {
-    display: flex;
-    padding: 0px 5px 1px 5px;
-    justify-content: flex-start;
-  }
-
-  .container-1.center {
-    display: flex;
-    padding: 0px 5px 1px 5px;
-    justify-content: center;
-  }
-
 </style>
